@@ -1,0 +1,129 @@
+<?php declare(strict_types=1);
+
+use Commerce365\Shipments\Block\ShipmentList;
+use Magento\Framework\Escaper;
+
+/** @var ShipmentList $block */
+/** @var Escaper $escaper */
+
+$totalResults = 0;
+$shipments = [];
+$shipmentsResponse = $block->getShipments();
+
+if (!empty($shipmentsResponse)) {
+    $shipments = $shipmentsResponse["salesDocuments"];
+    $totalResults = $shipmentsResponse["totalResults"];
+}
+?>
+
+<div class="shipping-history">
+    <div class="text-2xl mb-6"><?= $escaper->escapeHtml(__('My Shipments')) ?></div>
+    <?php if (count($shipments) > 0): ?>
+    <form action="<?= $escaper->escapeUrl($block->getFilterActionUrl()) ?>" method="get">
+        <div class="search-form-fields mb-4">
+            <input class="form-input w-full md:w-96" name="searchString" type="text"
+                placeholder="<?= $escaper->escapeHtml(__('Search...')) ?>" />
+            <button class="btn btn-primary" type="submit" title="<?= $escaper->escapeHtml(__('Search')) ?>">
+                <span><?= $escaper->escapeHtml(__('Search')) ?></span>
+            </button>
+        </div>
+    </form>
+    <?php if ($block->getSearchString()): ?>
+    <?= __('Current filter')?>: <?= $block->getSearchString()?>
+    <a href="<?= $block->getFilterActionUrl()?>"><?= __('Reset') ?></a>
+    <?php endif; ?>
+    <div class="card mb-6 overflow-x-auto">
+        <table id="my-orders-table" class="w-full">
+            <thead>
+                <tr>
+                    <th scope="col" class="col id p-2 text-left">
+                        <a href="<?= $block->getSortLink('No.')?>">
+                            <?= __('Shipment #') ?>
+                            <?= $block->getSortIcon('No.') ?>
+                        </a>
+                    </th>
+                    <th scope="col" class="col date p-2 text-left">
+                        <a href="<?= $block->getSortLink('Order Date')?>">
+                            <?= __('Date') ?>
+                            <?= $block->getSortIcon('Order Date') ?>
+                        </a>
+                    </th>
+                    <th scope="col" class="col status p-2 text-left">
+                        <a href="<?= $block->getSortLink('Order No.')?>">
+                            <?= __('From Order #') ?>
+                            <?= $block->getSortIcon('Order No.') ?>
+                        </a>
+                    </th>
+                    <th scope="col" class="col shipping p-2 text-left">
+                        <a href="<?= $block->getSortLink('Ship-to Name')?>">
+                            <?= __('Ship To') ?>
+                            <?= $block->getSortIcon('Ship-to Name') ?>
+                        </a>
+                    </th>
+                    <th scope="col" class="col total p-2 text-left">
+                        <a href="<?= $block->getSortLink('Ship-to Address')?>">
+                            <?= __('Address') ?>
+                            <?= $block->getSortIcon('Ship-to Address') ?>
+                        </a>
+                    </th>
+                    <th scope="col" class="col total p-2 text-left">
+                        <a href="<?= $block->getSortLink('Ship-to City')?>">
+                            <?= __('City') ?>
+                            <?= $block->getSortIcon('Ship-to City') ?>
+                        </a>
+                    </th>
+                    <th scope="col" class="col actions">&nbsp</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($shipments as $shipment): ?>
+                <tr class="align-top even:bg-gray-100">
+                    <td data-th="Order #" class="col id p-2"><?= $shipment["No."] ?></td>
+                    <td data-th="Date" class="col date p-2">
+                        <?= date_format(date_create($shipment["Order Date"]), "d-m-Y") ?></td>
+                    <td data-th="Status #" class="col id p-2"><?= $shipment["Order No."] ?></td>
+                    <td data-th="Ship To #" class="col id p-2"><?= $shipment["Ship-to Name"]?></td>
+                    <td data-th="Ship To Address" class="col total p-2"><?= $shipment["Ship-to Address"] ?></td>
+                    <td data-th="Ship To City" class="col total p-2"><?= $shipment["Ship-to City"] ?></td>
+                    <td data-th="Actions" class="col actions p-2">
+                        <a href="<?= $block->getViewUrl($shipment["id"]) ?>" class="action view">
+                            <span><?= __("View Shipment") ?></span>
+                        </a>
+                        <span class="text-secondary-lighter"> | </span>
+                        <a href="<?= $shipment["PDFUrl"] ?>" class="action order" target="_blank">
+                            <span>PDF</span>
+                        </a>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <?php else: ?>
+    <div class="message info empty"><span><?= $escaper->escapeHtml(__('No orders found.')) ?></span></div>
+    <?php endif; ?>
+</div>
+
+<?php if ($totalResults > $block->getPageSize()): ?>
+<div class="flex flex-col gap-2 md:flex-row md:items-center">
+    <?php
+            $totalPages = $shipmentsResponse["totalPages"];
+            $currentPage = $block->getPage();
+        ?>
+    <div>
+        <?= $escaper->escapeHtml(__('Page: %1 of %2', $currentPage, $totalPages)) ?>
+    </div>
+    <div class="flex flex-wrap justify-between items-center gap-2">
+        <?php if ($block->getPage() > 1): ?>
+        <a href="<?= $block->getPreviousPageUrl($block->getPage()) ?>" class="btn btn-secondary""><?= $escaper->escapeHtml(__('Previous')) ?></a>
+            <?php endif; ?>
+            <?php if ($block->getPage() > 1 && $block->getPage() < $shipmentsResponse["totalPages"]): ?>
+                -
+            <?php endif; ?>
+            <?php if ($block->getPage() < $shipmentsResponse["totalPages"]): ?>
+            <a href=" <?= $block->getNextPageUrl($block->getPage()) ?>"
+            class="btn btn-secondary"><?= $escaper->escapeHtml(__('Next')) ?></a>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endif; ?>
