@@ -1,6 +1,7 @@
 <?php
 $shipment = $this->getShipment();
 $shipmentLines = $shipment["Lines"];
+$trackingUrl = $shipment['Package Tracking URL SCNVN'] ?? '';
 ?>
 
 <div class="page-title-wrapper">
@@ -18,6 +19,11 @@ $shipmentLines = $shipment["Lines"];
         <a href="<?= $shipment["PDFUrl"] ?>" class="action order" target="_blank">
             <span><?= __('Download PDF') ?></span>
         </a>
+        <?php if ($trackingUrl !== ''): ?>
+        <a href="<?php echo $trackingUrl ?>" class="action order" target="_blank">
+            <span><?php echo __('Track & Trace (By Commerce 365 for Sendcloud)') ?></span>
+        </a>
+        <?php endif; ?>
     </div>
 </div>
 

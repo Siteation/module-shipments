@@ -8,6 +8,7 @@ use Magento\Framework\Escaper;
 
 $shipment = $block->getShipment();
 $shipmentLines = $shipment["Lines"];
+$trackingUrl = $shipment['Package Tracking URL SCNVN'] ?? '';
 ?>
 
 <div class="md:flex md:justify-between items-center mb-3">
@@ -25,10 +26,18 @@ $shipmentLines = $shipment["Lines"];
     <div class="actions">
         <a href="<?= $shipment["PDFUrl"] ?>" class="btn btn-secondary mb-4 order" style="justify-content: center;"
             target="_blank">
-            <?= $escaper-> escapeUrl(__('Download PDF')) ?>
+            <?= $escaper->escapeUrl(__('Download PDF')) ?>
         </a>
     </div>
 </div>
+
+<?php if ($trackingUrl !== ''): ?>
+<div class="message success message-success">
+    <a href="<?= $escaper->escapeUrl($trackingUrl) ?>" class="action order" target="_blank" rel="noopener noreferrer">
+        <span><?= $escaper->escapeHtml(__('Track & Trace (By Commerce 365 for Sendcloud)'))?></span>
+    </a>
+</div>
+<?php endif; ?>
 
 <div class="order-details-items ordered">
     <div class="-mx-4">
